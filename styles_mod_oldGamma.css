@@ -1,0 +1,48 @@
+
+.twogram-100 {
+    background-color: #27ae60; /* Light Green */
+    color: #000000; /* White */
+}
+.twogram-050 {
+    background-color: #85d2a5; /* Lighter Green */
+    color: #000000; /* Black */
+}
+.onegram-100 {
+    background-color: #d2eede; /* Yellow */
+    color: #000000; /* Black */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+.close-match {
+    background-color: #27ae60; /* Dark Green */
+    color: #000000; /* Black */
+}
+
+
+.exact-bigram {
+    background-color: #27ae60; /* Dark Green */
+    color: #000000; /* Black */
+}
+.fuzzy-bigram {
+    background-color: #a9dfbf; /* Slightly less saturated, lighter green */
+    color: #000000; /* Black */
+}
+.exact-unigram {
+    background-color: #f7dc6f; /* Saturated yellow */
+    color: #000000; /* Black */
+}
+.fuzzy-unigram {
+    background-color: #fef9e7; /* Less saturated yellow */
+    color: #000000; /* Black */
+}

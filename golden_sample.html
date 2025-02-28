@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MBFFA Companions: “Golden Sample”</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="styles_mod_oldGamma.css">
+<link rel="stylesheet" type="text/css" href="styles_main.css">
+</head>
+<body>
+<h1>MBFFA Companions: “Golden Sample”</h1>
+
+<div class="search-container">
+  <input type="text" id="searchInput" placeholder="Enter URI to search...">
+  <button onclick="search()">Search</button>
+</div>
+<div id="results"></div>
+
+<div class="bio-container">
+    
+    <p>
+      The app is an appendix to my article on ... published in the ... <br><br>
+
+
+      <b>IMPORTANT:</b> Orthography of Arabic texts is simplified (normalized) and punctuation removed to facilitate matching.
+      You can find biographies in their original formating and orthography in the <a href="biographies_stats_regex.html">Biographical Corpus Companion</a>.<br><br>
+
+
+      <i>How does this work?</i> <b>Search:</b> type or copy-paste either the five letter code for the pair of biographies (like <span class="uri">LCAYN</span>)
+      or an ID of a specific biography (like <span class="uri">0748Dhahabi.TarikhIslam.403844786686</span>); after clicking Search, the app will load matching biographies for close reading.
+      You can also click any of the buttons with PAIRIDs below.
+
+      <b>Highlighting:</b> Biographies are color-coded:
+      <span class="twogram-100">Dark green</span> indicates exact bigrams shared between both texts;
+      <span class="twogram-050">Lighter green</span> indicates nearly identical bigrams shared between both texts (for example, <i>Abū Zakariyā</i> and <i>Abā Zakariyāʾ</i>);
+      <span class="onegram-100">Lightest green</span> indicates exact unigrams (which are not parts of bigrams) shared between both texts;
+      you can click on any of the Arabic words to automatically show <span class="highlight">all their instances</span> in both biographies highlighted with yellow, to help parallel reading (this works only with exact matches).
+
+    </p>
+
+
+    <p>
+      <i>Abbreviations:</i>
+      <b>IF:</b> Ibn al-Faraḍī (d. 403/1013). <i>Taʾrīḫ al-ʿulamāʾ</i> (<span class="uri">0403IbnFaradi.TarikhCulamaAndalus</span>);
+      <b>IB:</b> Ibn Baškuwāl (d. 578/1183). <i>al-Ṣilaŧ</i> (<span class="uri">0578IbnBashkuwal.Sila</span>);
+      <b>IA:</b> Ibn al-Abbār al-Quḍāʿī (d. 658/1260). <i>al-Takmilaŧ li-kitāb al-Ṣilaŧ</i> (<span class="uri">0658IbnAbbar.TakmilaLiSila</span>);
+      <b>DHTI:</b> al-Ḏahabī (d. 748/1348). <i>Taʾrīḫ al-islām</i> (<span class="uri">0748Dhahabi.TarikhIslam</span>)
+    </p>
+
+    <p>
+      <i>Complete Biographical Corpus:</i> you can find all biographies (c. 37,000) from these sources in the <a href="biographies_stats_regex.html">Biographical Corpus Companion</a>.
+      Biographies are searcheable by their IDs, but you also have an option of complete text search (in Arabic) or in Buckwalter-like simplified transliteration.
+      Since biographies preserve their original orthography and punctuation, searching with transliteration will give more results. 
+    </p>
+    
+</div>
+
+<div class="search-container" id="uri-list">
+  <!-- URI buttons will be dynamically added here -->
+</div>
+
+<script>
+document.getElementById('searchInput').addEventListener("keyup", function(event) {
+  if (event.key === "Enter") {
+    search();
+  }
+});
+
+let biosData = [];
+
+// Load the JSON data
+fetch('COMPDATAPOS_TEXTS_UPDATED.json')
+  .then(response => response.json())
+  .then(data => {
+    biosData = data;
+    populateURIs();
+  })
+  .catch(error => console.error('Error loading the JSON:', error));
+
+function populateURIs() {
+  const uriList = document.getElementById('uri-list');
+  biosData.forEach(bio => {
+    const button = document.createElement('button');
+    button.className = 'uri-button';
+    //button.textContent = bio.PAIRID + " (" + bio.PAIRCITATION + ")";
+    // button.textContent = bio.PAIRCITATION;
+    button.textContent = "PAIRID: " + bio.PAIRID;
+    button.onclick = () => {
+      document.getElementById('searchInput').value = bio.PAIRID;
+      search();
+      window.scrollTo(0, 0); // Scroll to the top of the page
+    };
+    uriList.appendChild(button);
+  });
+}
+
+function search() {
+  const input = document.getElementById('searchInput').value.trim().toLowerCase();
+  const resultsContainer = document.getElementById('results');
+  resultsContainer.innerHTML = ''; // Clear previous results
+
+  const results = biosData.filter(bio =>
+    bio.PAIRID.toLowerCase().includes(input) ||
+    bio.uri2a.toLowerCase().includes(input) ||
+    bio.uri1a.toLowerCase().includes(input)
+  );
+
+  if (results.length > 0) {
+    results.forEach(result => {
+      const div = document.createElement('div');
+      div.className = 'bio-container';
+      div.innerHTML = `
+        <div class="bio-header">
+          <h3>${result.uri2aCIT} == ${result.uri1aCIT} (<span class="uri">${result.PAIRID}</span>)</h3>
+        </div>
+        <div class="bio-row">
+          <div class="bio">
+            <div class="bio-title">${result.uri2aCIT} (<span class="uri">${result.uri2a}</span>)</div>
+            <div class="bio-text" id="bio-text1-${result.PAIRID}">${result.uri2aHTML}</div>
+            <button onclick="copyToClipboard('bio-text1-${result.PAIRID}')">Copy Text</button>
+          </div>
+          <div class="bio">
+            <div class="bio-title">${result.uri1aCIT} (<span class="uri">${result.uri1a}</span>)</div>
+            <div class="bio-text" id="bio-text2-${result.PAIRID}">${result.uri1aHTML}</div>
+            <button onclick="copyToClipboard('bio-text2-${result.PAIRID}')">Copy Text</button>
+          </div>
+        </div>
+        <div class="bio-summary">${result.Summary}</div>
+      `;
+      resultsContainer.appendChild(div);
+    });
+  } else {
+    resultsContainer.innerHTML = '<p>No results found for: ' + input + '</p>';
+  }
+}
+
+function copyToClipboard(elementId) {
+  const text = document.getElementById(elementId).innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Text copied to clipboard');
+  }).catch(err => {
+    alert('Failed to copy text: ', err);
+  });
+}
+
+
+
+</script>
+
+<!-- Link to external JS file -->
+<script src="biographyComparison.js"></script>
+
+
+</body>
+</html>

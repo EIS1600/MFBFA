@@ -1,0 +1,54 @@
+.exact-bigram {
+    background-color: #006400; /* Dark Green */
+    color: #ffffff; /* White */
+}
+.fuzzy-bigram {
+    background-color: #32CD32; /* Light Green */
+    color: #000000; /* Black */
+}
+.exact-unigram {
+    background-color: #FFD700; /* Gold */
+    color: #000000; /* Black */
+}
+.fuzzy-unigram {
+    background-color: #FFFFE0; /* Light Yellow */
+    color: #000000; /* Black */
+}
+
+
+
+
+
+
+
+
+.bigram-exact {
+    background-color: #006400; /* Dark Green */
+    color: #ffffff; /* White */
+}
+.bigram-close {
+    background-color: #32CD32; /* Light Green */
+    color: #000000; /* Black */
+}
+.unigram-match {
+    background-color: #FFD700; /* Gold */
+    color: #000000; /* Black */
+}
+
+
+
+/*
+
+    for token in tokens:
+        if token in bigram_words_exact:
+            html_content += f'<span class="bigram-exact">{token}</span> '
+        elif token in bigram_words_close:
+            html_content += f'<span class="bigram-close">{token}</span> '
+        elif token in unigram_matches:
+            html_content += f'<span class="unigram-match">{token}</span> '
+        else:
+            html_content += f'{token} '
+
+
+
+*/

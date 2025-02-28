@@ -1,0 +1,149 @@
+/* Ensure Gentium font is applied globally */
+body {
+  font-family: 'Brill', 'Gentium', serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 10px;
+  color: #333;
+}
+
+h1 {
+  font-family: 'Brill', 'Gentium', serif; /* Apply Gentium font to the heading */
+  text-align: center;
+  font-weight: normal;
+  color: #333;
+}
+
+.search-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+input[type="text"] {
+  padding: 10px;
+  width: 50%; /* Increased width */
+  max-width: 600px; /* Maximum width to maintain usability */
+  font-size: 16px;
+  font-family: 'Roboto Mono', sans-serif; /* Ensure Gentium font is applied */
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+button, .uri-button {
+  padding: 5px 5px;
+  font-size: 8px; /* Smaller font size for compact display */
+  font-family: 'Roboto Mono', sans-serif; /* Apply Gentium font */
+  border-radius: 5px;
+  border: none;
+  background-color: #205081;
+  color: white;
+  cursor: pointer;
+  margin: 2px; /* Small margin for better spacing */
+}
+
+.uri {
+  font-size: 12px; /* Smaller font size for compact display */
+  font-family: 'Roboto Mono', sans-serif; /* Apply Gentium font */
+}
+
+button:hover, .uri-button:hover {
+  background-color: #1d4877;
+}
+
+code {
+    padding: 2px 4px;
+    font-size: 90%;
+    color: #0091FA;
+    background-color: #ffffff;
+    border-radius: 4px;
+    font-weight: bold;
+    font-family: "Courier New", monospace; 
+}
+
+.bio-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 85%;
+  margin: 20px auto;
+  background: #ffffff;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  padding: 20px;
+  border-radius: 8px;
+  font-family: 'Brill', 'Gentium', serif; /* Apply Gentium font */
+}
+
+.response-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90%;
+  max-width: 960px;
+  margin: 20px auto;
+  background: #ffffff;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  padding: 20px;
+  border-radius: 8px;
+  font-family: 'Brill', 'Gentium', serif; /* Apply Gentium font */
+}
+
+.bio-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  width: 100%;
+}
+
+.bio {
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  flex: 1;
+  overflow: auto;
+  border-radius: 5px;
+}
+
+.bio-text {
+  direction: rtl;
+  width: 100%;
+  font-family: 'Amiri', serif; /* Keep Amiri font for Arabic text */
+}
+
+#results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bio-title {
+  font-weight: normal;
+  margin-bottom: 5px;
+  color: #0d2a46; /* A nice blue shade */
+  font-family: 'Brill', 'Gentium', serif; /* Ensure Gentium font for titles */
+}
+
+.highlight {
+  background-color: yellow;
+  font-weight: normal;
+}
+
+/* Make words clickable by changing cursor style */
+.clickable-word {
+  cursor: pointer;
+}
+
+/* Reset button style */
+#resetButton {
+  margin-top: 10px;
+  padding: 5px 10px;
+  font-size: 16px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+#resetButton:hover {
+  background-color: #ddd;
+}

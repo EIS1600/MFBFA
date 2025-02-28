@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MBFFA Companions: Omitted Biographies</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="styles_mod_oldGamma.css">
+<link rel="stylesheet" type="text/css" href="styles_main.css">
+</head>
+<body>
+<h1>MBFFA Companions: Omitted Biographies (from top 450)</h1>
+
+<div class="search-container">
+  <input type="text" id="searchInput" placeholder="Enter MIUID or text to search...">
+  <button onclick="search()">Search</button>
+</div>
+
+<div id="results"></div>
+
+<div class="bio-container" id="bio-container">
+  <!-- Biographies will be dynamically added here -->
+</div>
+
+<div class="search-container" id="uri-list">
+  <!-- URI buttons will be dynamically added here -->
+</div>
+
+<script>
+document.getElementById('searchInput').addEventListener("keyup", function(event) {
+  if (event.key === "Enter") {
+    search();
+  }
+});
+
+let biosData = [];
+
+// Load the JSON data from the provided file path
+fetch('./OMITTED/OMITTED_SUMMARIES__OmittedSummarization_4o-mini.json')
+  .then(response => response.json())
+  .then(data => {
+    biosData = data;
+    populateButtons(); // Populate the buttons after loading data
+  })
+  .catch(error => console.error('Error loading the JSON:', error));
+
+// Populate the buttons with MIUID_OMI as values
+function populateButtons() {
+  const uriList = document.getElementById('uri-list');
+  biosData.forEach(bio => {
+    const button = document.createElement('button');
+    button.className = 'uri-button';
+    button.textContent = bio.MIUID_OMI;
+    button.onclick = () => {
+      document.getElementById('searchInput').value = bio.MIUID_OMI;
+      search(); // Perform search when the button is clicked
+      window.scrollTo(0, 0); // Scroll to the top of the page
+    };
+    uriList.appendChild(button);
+  });
+}
+
+function search() {
+  const input = document.getElementById('searchInput').value.trim().toLowerCase();
+  const resultsContainer = document.getElementById('results');
+  resultsContainer.innerHTML = ''; // Clear previous results
+
+  const results = biosData.filter(bio =>
+    bio.MIUID_OMI.toLowerCase().includes(input) ||
+    bio.BIO_TEXT.toLowerCase().includes(input) ||
+    bio.SEARCH.toLowerCase().includes(input)
+  );
+
+  if (results.length > 0) {
+    results.forEach(result => {
+      const bioDiv = document.createElement('div');
+      bioDiv.className = 'bio-container';
+      bioDiv.innerHTML = `
+        <div class="bio-header">
+          <h3>${result.MIUID_OMI}</h3>
+        </div>
+        <div class="bio">
+          <p class="bio-text">${result.BIO_TEXT}</p>
+        </div>
+      `;
+
+      // Add RESPONSE text above the SVG image
+      if (result.RESPONSE) {
+        const responseDiv = document.createElement('div');
+        responseDiv.className = 'response-container';
+        responseDiv.innerHTML = `<p><strong>LLM Summary Response:</strong> ${result.RESPONSE}</p>`;
+        bioDiv.appendChild(responseDiv);
+      }
+
+      // Add SVG image below the RESPONSE (or biography if no RESPONSE)
+      const svgImg = document.createElement('img');
+      svgImg.src = `./OMITTED/${result.MIUID_OMI}.svg`; // Set the path dynamically
+      svgImg.alt = `${result.MIUID_OMI} image`;
+      svgImg.style.maxWidth = '100%'; // Make sure the image fits the container
+      svgImg.style.marginTop = '10px'; // Add some space above the image
+      bioDiv.appendChild(svgImg); // Append the image below the biography
+
+      resultsContainer.appendChild(bioDiv);
+    });
+  } else {
+    resultsContainer.innerHTML = '<p>No results found for: ' + input + '</p>';
+  }
+}
+</script>
+
+</body>
+</html>

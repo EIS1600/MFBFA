@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Biography Comparison Tool</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="styles_mod_oldGamma.css">
+  <link rel="stylesheet" type="text/css" href="styles_main.css">
+</head>
+<body>
+  <h1>MBFFA: Biographical Corpus Companion</h1>
+
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Enter MIUID or text to search...">
+    <button onclick="search()">Search</button>
+  </div>
+
+  <div id="results"></div>
+
+  <div class="bio-container">
+
+    <p>
+      
+      <b>How to use this?</b> This companion contains over 37,000 biographies, which are fully searcheable. You can search in Arabic as well as in Buckwalter-like transliteration.
+      The transliteration will give more exact results, since it implements basic normalization of Arabic orthography (for example, all forms of <i>alif</i> can be captures with capital <code>A</code>);
+      additionally, transliterated text does not contain any punctuation, which is particularly helpful when you are searching for phrases and want to make sure that there are no unexpected characters between two words.
+      You can also use <code>regular expressions</code> to fine-tune your search results.
+      <br><br>
+
+      <b>Search results:</b> in addition to all the biographies in which your query was found, you will recieve a general summary which counts biographies in which the expression was identified,
+      including 1) the number of biographies per each source; 2) the number of biographies in Andalusian sources; 3) the number of biographies in the Andalusian Sample (original biographies that al-Ḏahabī borrowed);
+      4) the number of biographies in al-Ḏahabī’s Sample (modified biographies—these are usually shorter, so the results will highlight if al-Ḏahabī dropped some specfiic expressions from borrowed biographies).
+      <br><br>
+
+      <b>Example:</b> We can search for <code>\b(ykny AbA \w+)\b</code> (copy-paste the entire expression into the Search window and hit “Enter”). This will find all expressions <i>yukná Abā Fulān</i>. The “Search Results Summary” will tell show you that these expression is used extremely frequently in Andalusian sources (68% of biographies altogether), and found in 61% of all biographies in Ibn al-Faraḍī, 89%—in Ibn Baškuwāl, and 62%—in Ibn al-Abbār, and only in 0.49% of all biographies in al-Ḏahabī. Furthermore, this expression was in 83% of biographies in the “Golden Sample” (1,752 biographies altogether) and al-Ḏahabī removed it—turned into a simple <i>kunyaŧ</i>—from almost all of them (the expression remained only in 6 biographies, which he most likely simply missed).
+      <br><br>
+
+      <b>Buckwalter-like Transliteration:</b> : <code>ء = c</code>,  <code>ا = A</code>,  <code>إ = A</code>,  <code>أ = A</code>,  <code>آ = A</code>,  <code>ب = b</code>,  <code>ة = o</code>,  <code>ت = t</code>,  <code>ث = v</code>,  <code>ج = j</code>,  <code>ح = H</code>,  <code>خ = x</code>,  <code>د = d</code>,  <code>ذ = V</code>,  <code>ر = r</code>,  <code>ز = z</code>,  <code>س = s</code>,  <code>ش = E</code>,  <code>ص = S</code>,  <code>ض = D</code>,  <code>ط = T</code>,  <code>ظ = Z</code>,  <code>ع = C</code>,  <code>غ = g</code>,  <code>ف = f</code>,  <code>ق = q</code>,  <code>ك = k</code>,  <code>ل = l</code>,  <code>م = m</code>,  <code>ن = n</code>,  <code>ه = h</code>,  <code>ؤ = c</code>,  <code>و = w</code>,  <code>ى = y</code>,  <code>ئ = c</code>,  <code>ي = y</code>.</p>
+
+      
+
+    </p>
+
+  </div>
+
+  <div class="bio-container" id="bio-container">
+    <!-- Biographies will be dynamically added here -->
+  </div>
+
+  <script>
+    document.getElementById('searchInput').addEventListener("keyup", function(event) {
+      if (event.key === "Enter") {
+        search();
+      }
+    });
+
+    let biosData = [];
+    // Load the JSON data from the user-provided file
+    fetch('DATA_BIO_PER_CELL_FOR_APP.json')
+      .then(response => response.json())
+      .then(data => {
+        biosData = data;
+      })
+      .catch(error => console.error('Error loading the JSON:', error));
+
+    function search() {
+      const input = document.getElementById('searchInput').value.trim();
+      const resultsContainer = document.getElementById('results');
+      const bioContainer = document.getElementById('bio-container');
+      resultsContainer.innerHTML = ''; // Clear previous results
+      bioContainer.innerHTML = ''; // Clear the biography section
+
+      let regex;
+      try {
+        // Create a case-insensitive regex from the input
+        regex = new RegExp(input, 'i');
+      } catch (e) {
+        resultsContainer.innerHTML = `<p>Invalid regex: ${input}</p>`;
+        return;
+      }
+
+      // Search for biographies using the regex on MIUID, BIO_TEXT, or SEARCH fields
+      const results = biosData.filter(bio =>
+        regex.test(bio.MIUID) ||
+        regex.test(bio.BIO_TEXT) ||
+        regex.test(bio.SEARCH)
+      );
+
+      if (results.length > 0) {
+        // Initialize counters for source counts
+        const sourceCounts = {
+          "0748Dhahabi.TarikhIslam": 0,
+          "0403IbnFaradi.TarikhCulamaAndalus": 0,
+          "0578IbnBashkuwal.Sila": 0,
+          "0658IbnAbbar.TakmilaLiSila": 0,
+          "Sample.Andalusi": 0,
+          "Sample.Dhahabi": 0,
+          "AndalusianSources": 0
+        };
+        const totalBios = results.length;
+
+        // Count biographies by source and accumulate counts for Andalusian sources
+        results.forEach(result => {
+          // Count sample statuses independently
+          if (result.STATUS === "ANDALUSI") {
+            sourceCounts["Sample.Andalusi"]++;
+          }
+          if (result.STATUS === "DHAHABI") {
+            sourceCounts["Sample.Dhahabi"]++;
+          }
+
+          // Count based on MIUID by stripping the final element of the ID to get the base book ID
+          const bookID = result.MIUID.split('.').slice(0, -1).join('.');
+          if (sourceCounts.hasOwnProperty(bookID)) {
+            sourceCounts[bookID]++;
+          }
+          // If the book ID is one of the Andalusian sources, accumulate the count
+          if (["0403IbnFaradi.TarikhCulamaAndalus", "0578IbnBashkuwal.Sila", "0658IbnAbbar.TakmilaLiSila"].includes(bookID)) {
+            sourceCounts["AndalusianSources"]++;
+          }
+
+          // Create and display the biography entry
+          const bioDiv = document.createElement('div');
+          bioDiv.className = 'bio-entry';
+          bioDiv.innerHTML = `
+            <div class="bio-header">
+              <h3>BIOID: ${result.MIUID}</h3>
+            </div>
+            <div class="bio">
+              <p class="bio-text">${result.BIO_TEXT}</p>
+            </div>
+          `;
+          bioContainer.appendChild(bioDiv);
+        });
+
+        // Total counts for each source and Andalusian sources
+        const totalCounts = {
+          "0748Dhahabi.TarikhIslam": 30491,
+          "0403IbnFaradi.TarikhCulamaAndalus": 1659,
+          "0578IbnBashkuwal.Sila": 1543,
+          "0658IbnAbbar.TakmilaLiSila": 3580,
+          "Sample.Andalusi": 2109,
+          "Sample.Dhahabi": 2109,
+          "AndalusianSources": 6782 // Total count for Andalusian sources
+        };
+
+        // Create a concise report combining absolute and relative counts for each source
+        const reportHTML = `
+          <h3>Search Results Summary</h3>
+          <!-- ${totalBios} -->
+          <table style="width:85%; border-collapse: collapse; margin-top: 1em;">
+            <thead>
+              <tr style="border-bottom: 2px solid #444;">
+                <th style="text-align: left; padding: 8px;">Source</th>
+                <th style="text-align: right; padding: 8px;">Bio Count</th>
+                <th style="text-align: right; padding: 8px;">Percentage</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Row 1: Type 1 -->
+              <tr style="background-color: white; border-bottom: 1px solid #d6dbdf;">
+                <td style="text-align: left; padding: 8px;"><i>Taʾrīḫ al-islām</i> of al-Ḏahabī (d. 748/1347)</td>
+                <td style="text-align: right; padding: 8px;">${sourceCounts["0748Dhahabi.TarikhIslam"]}</td>
+                <td style="text-align: right; padding: 8px;">${(sourceCounts["0748Dhahabi.TarikhIslam"] / totalCounts["0748Dhahabi.TarikhIslam"] * 100).toFixed(2)}%</td>
+              </tr>
+              <!-- Row 2: Type 2 -->
+              <tr style="background-color: #d6dbdf; border-bottom: 1px solid #d6dbdf;">
+                <td style="text-align: left; padding: 8px;"><i>Taʾrīḫ al-ʿulamāʾ</i> of Ibn al-Faraḍī (d. 403/1013)</td>
+                <td style="text-align: right; padding: 8px;">${sourceCounts["0403IbnFaradi.TarikhCulamaAndalus"]}</td>
+                <td style="text-align: right; padding: 8px;">${(sourceCounts["0403IbnFaradi.TarikhCulamaAndalus"] / totalCounts["0403IbnFaradi.TarikhCulamaAndalus"] * 100).toFixed(2)}%</td>
+              </tr>
+              <!-- Row 3: Type 2 -->
+              <tr style="background-color: #d6dbdf; border-bottom: 1px solid #d6dbdf;">
+                <td style="text-align: left; padding: 8px;"><i>Kitāb al-Ṣilaŧ</i> of Ibn Baškuwāl (d. 578/1183)</td>
+                <td style="text-align: right; padding: 8px;">${sourceCounts["0578IbnBashkuwal.Sila"]}</td>
+                <td style="text-align: right; padding: 8px;">${(sourceCounts["0578IbnBashkuwal.Sila"] / totalCounts["0578IbnBashkuwal.Sila"] * 100).toFixed(2)}%</td>
+              </tr>
+              <!-- Row 4: Type 2 -->
+              <tr style="background-color: #d6dbdf; border-bottom: 1px solid #d6dbdf;">
+                <td style="text-align: left; padding: 8px;"><i>al-Takmilaŧ li-kitāb al-Ṣilaŧ</i> of Ibn al-Abbār (d. 658/1260)</td>
+                <td style="text-align: right; padding: 8px;">${sourceCounts["0658IbnAbbar.TakmilaLiSila"]}</td>
+                <td style="text-align: right; padding: 8px;">${(sourceCounts["0658IbnAbbar.TakmilaLiSila"] / totalCounts["0658IbnAbbar.TakmilaLiSila"] * 100).toFixed(2)}%</td>
+              </tr>
+              <!-- Row 5: Type 3 -->
+              <tr style="background-color: white; border-bottom: 1px solid #d6dbdf;">
+                <td style="text-align: left; padding: 8px;">Andalusian Sources (total)</td>
+                <td style="text-align: right; padding: 8px;">${sourceCounts["AndalusianSources"]}</td>
+                <td style="text-align: right; padding: 8px;">${(sourceCounts["AndalusianSources"] / totalCounts["AndalusianSources"] * 100).toFixed(2)}%</td>
+              </tr>
+              <!-- Row 6: Type 4 -->
+              <tr style="background-color: #d6dbdf; border-bottom: 1px solid #d6dbdf;">
+                <td style="text-align: left; padding: 8px;">“Golden Sample”: Ibn al-Faraḍī, Ibn Baškuwāl, Ibn al-Abbār</td>
+                <td style="text-align: right; padding: 8px;">${sourceCounts["Sample.Andalusi"]}</td>
+                <td style="text-align: right; padding: 8px;">${(sourceCounts["Sample.Andalusi"] / totalCounts["Sample.Andalusi"] * 100).toFixed(2)}%</td>
+              </tr>
+              <!-- Row 7: Type 4 -->
+              <tr style="background-color: #d6dbdf;">
+                <td style="text-align: left; padding: 8px;">“Golden Sample”: al-Ḏahabī</td>
+                <td style="text-align: right; padding: 8px;">${sourceCounts["Sample.Dhahabi"]}</td>
+                <td style="text-align: right; padding: 8px;">${(sourceCounts["Sample.Dhahabi"] / totalCounts["Sample.Dhahabi"] * 100).toFixed(2)}%</td>
+              </tr>
+            </tbody>
+          </table>
+        `;
+
+        resultsContainer.innerHTML = reportHTML;
+      } else {
+        resultsContainer.innerHTML = '<p>No results found for: ' + input + '</p>';
+      }
+    }
+  </script>
+
+</body>
+</html>
