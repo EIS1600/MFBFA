@@ -11,6 +11,15 @@
 <body>
 <h1>MBFFA Companions: “Golden Sample”</h1>
 
+  <div class="links">
+    <ul>
+      <li><a href="index.html">Main</a></li>
+      <li><a href="golden_sample.html">“Golden Sample”</a></li>
+      <li><a href="biographies_stats_regex.html">Biographical Corpus Companion</a></li>
+      <li><a href="omitted.html">Omitted Biographies</a></li>
+    </ul>
+  </div>
+
 <div class="search-container">
   <input type="text" id="searchInput" placeholder="Enter URI to search...">
   <button onclick="search()">Search</button>
@@ -59,6 +68,10 @@
 <div class="search-container" id="uri-list">
   <!-- URI buttons will be dynamically added here -->
 </div>
+
+  <div class="bio-container">
+  <center>&copy; Maxim Romanov, University of Hamburg, 2025</center>
+  </div>
 
 <script>
 document.getElementById('searchInput').addEventListener("keyup", function(event) {
@@ -150,7 +163,6 @@ function copyToClipboard(elementId) {
 
 <!-- Link to external JS file -->
 <script src="biographyComparison.js"></script>
-
 
 </body>
 </html>
